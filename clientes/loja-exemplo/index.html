@@ -1,11 +1,12 @@
 
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PIX NFC</title>
-  <style>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PIX NFC</title>
+<style>
     body { font-family: sans-serif; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
     .client-logo { margin: 20px 0; }
     .config-toolbar {
@@ -22,83 +23,68 @@
   </style>
 </head>
 <body id="mainBody">
-  <h1 id="merchantName">Loja Exemplo</h1>
-  <p id="merchantSubtitle">Pagamento via PIX</p>
-  <div class="client-logo" id="clientLogo">Logo do Cliente</div>
-  <pre id="pixCode">Chave PIX aqui...</pre>
-  <button class="action-button" onclick="copyToClipboard()" id="mainButton">📋 Copiar Código PIX</button>
+<h1 id="merchantName">Loja Exemplo</h1>
+<p id="merchantSubtitle">Pagamento via PIX</p>
+<div class="client-logo" id="clientLogo">Logo do Cliente</div>
+<pre id="pixCode">Chave PIX aqui...</pre>
+<button class="action-button" id="mainButton" onclick="copyToClipboard()">📋 Copiar Código PIX</button>
+<div class="config-toolbar">
+<label>🎨 Fundo: <input id="bgColorPicker" type="color" value="#667eea"/></label><br/>
+<label>🟢 Cor do botão: <input id="btnColorPicker" type="color" value="#32BCAD"/></label><br/>
+<label>🔤 Cor do texto: <input id="textColorPicker" type="color" value="#ffffff"/></label><br/>
+<button onclick="criarNovaPagina()">➕ Nova Página</button>
+<button onclick="baixarZip()">⬇️ Exportar ZIP</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
-  <div class="config-toolbar">
-    <label>🎨 Fundo: <input type="color" id="bgColorPicker" value="#667eea"></label><br>
-    <label>🟢 Cor do botão: <input type="color" id="btnColorPicker" value="#32BCAD"></label><br>
-    <label>🔤 Cor do texto: <input type="color" id="textColorPicker" value="#ffffff"></label><br>
-    <button onclick="criarNovaPagina()">➕ Nova Página</button>
-    <button onclick="baixarZip()">⬇️ Exportar ZIP</button>
-  </div>
+<script>
+const paginas = [];
 
-  <script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
-  <script>
-    const paginas = [];
+function copyToClipboard() {
+  const text = document.getElementById("pixCode").textContent;
+  navigator.clipboard.writeText(text);
+}
 
-    function copyToClipboard() {
-      const text = document.getElementById("pixCode").textContent;
-      navigator.clipboard.writeText(text);
-    }
+document.getElementById('bgColorPicker').addEventListener('input', e => {
+  document.getElementById('mainBody').style.background = e.target.value;
+});
 
-    document.getElementById('bgColorPicker').addEventListener('input', e => {
-      document.getElementById('mainBody').style.background = e.target.value;
-    });
+document.getElementById('btnColorPicker').addEventListener('input', e => {
+  document.getElementById('mainButton').style.backgroundColor = e.target.value;
+});
 
-    document.getElementById('btnColorPicker').addEventListener('input', e => {
-      document.getElementById('mainButton').style.backgroundColor = e.target.value;
-    });
+document.getElementById('textColorPicker').addEventListener('input', e => {
+  document.getElementById('mainButton').style.color = e.target.value;
+});
 
-    document.getElementById('textColorPicker').addEventListener('input', e => {
-      document.getElementById('mainButton').style.color = e.target.value;
-    });
+function criarNovaPagina() {
+  const nome = prompt("Nome da loja:");
+  if (!nome) return;
 
-    function criarNovaPagina() {
-      const nome = prompt("Nome da loja:");
-      if (!nome) return;
+  const doc = document.documentElement.cloneNode(true);
+  const config = JSON.parse(localStorage.getItem('pixConfig') || "{}");
 
-      const doc = document.documentElement.cloneNode(true);
-      const config = JSON.parse(localStorage.getItem('pixConfig') || "{}");
+  doc.querySelector("body").style.background = document.getElementById('bgColorPicker').value;
+  const mainBtn = doc.getElementById("mainButton");
+  mainBtn.style.backgroundColor = document.getElementById('btnColorPicker').value;
+  mainBtn.style.color = document.getElementById('textColorPicker').value;
 
-      doc.querySelector("body").style.background = document.getElementById('bgColorPicker').value;
-      const mainBtn = doc.getElementById("mainButton");
-      mainBtn.style.backgroundColor = document.getElementById('btnColorPicker').value;
-      mainBtn.style.color = document.getElementById('textColorPicker').value;
+  if (config.logoUrl) doc.getElementById("clientLogo").innerHTML = '<img src="' + config.logoUrl + '" />';
+  if (config.merchantName) doc.getElementById("merchantName").textContent = config.merchantName;
+  if (config.merchantSubtitle) doc.getElementById("merchantSubtitle").textContent = config.merchantSubtitle;
+  if (config.pixCode) doc.getElementById("pixCode").textContent = config.pixCode;
 
-      if (config.logoUrl) doc.getElementById("clientLogo").innerHTML = '<img src="' + config.logoUrl + '" />';
-      if (config.merchantName) doc.getElementById("merchantName").textContent = config.merchantName;
-      if (config.merchantSubtitle) doc.getElementById("merchantSubtitle").textContent = config.merchantSubtitle;
-      if (config.pixCode) doc.getElementById("pixCode").textContent = config.pixCode;
+  const toolbar = doc.querySelector(".config-toolbar");
+  if (toolbar) toolbar.remove();
 
-      const toolbar = doc.querySelector(".config-toolbar");
-      if (toolbar) toolbar.remove();
-
-      const htmlFinal = "<!DOCTYPE html>\n" + doc.outerHTML;
-      paginas.push({ nome, html: htmlFinal });
-
-      alert("✅ Página '" + nome + "' criada! Use 'Exportar ZIP' para baixar todas.");
-    }
-
-    function baixarZip() {
-      if (paginas.length === 0) {
-        alert("Nenhuma página criada ainda.");
-        return;
-      }
-
-      const zip = new JSZip();
-      paginas.forEach(p => {
-        zip.file(`clientes/${p.nome}/index.html`, p.html);
-      });
-
-      zip.generateAsync({type:"blob"}).then(content => {
-        saveAs(content, "clientes.zip");
-      });
-    }
-  </script>
-</body>
+  const htmlFinal = "<!DOCTYPE html>\n" + doc.outerHTML;
+  const blob = new Blob([htmlFinal], { type: "text/html" });
+  const a = document.createElement('a');
+  a.download = `clientes/${nome}/index.html`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script></body>
 </html>

@@ -1,50 +1,90 @@
 
 <!DOCTYPE html>
+
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PIX NFC - Painel de Lojas</title>
-  <style>
-    body { font-family: sans-serif; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
-    h1 { text-align: center; }
-    .lojas { max-width: 600px; margin: 2rem auto; background: white; border-radius: 10px; padding: 1rem; color: #333; }
-    .loja { padding: 10px; border-bottom: 1px solid #eee; }
-    .loja:last-child { border-bottom: none; }
-    .loja a { text-decoration: none; color: #007bff; font-weight: bold; }
-    .nova { margin: 2rem auto; max-width: 600px; text-align: center; }
-    .nova button {
-      background-color: #32BCAD;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 8px;
-      cursor: pointer;
-      font-size: 14px;
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PIX NFC</title>
+<style>
+    body { font-family: sans-serif; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); }
+    .client-logo { margin: 20px 0; }
+    .config-toolbar {
+      position: fixed; bottom: 20px; left: 20px; z-index: 9999;
+      background: white; border: 1px solid #ccc; border-radius: 10px;
+      padding: 10px 15px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .config-toolbar input[type='color'] { width: 40px; height: 30px; border: none; padding: 0; }
+    .action-button {
+      background-color: #32BCAD; color: white;
+      border: none; padding: 10px 20px; border-radius: 8px;
+      cursor: pointer; font-size: 14px; margin: 5px 0;
     }
   </style>
 </head>
-<body>
-  <h1>🏪 Painel de Lojas - PIX NFC</h1>
-  <div class="nova">
-    <button onclick="window.location.href='criador.html'">➕ Criar Nova Loja</button>
-  </div>
-  <div class="lojas" id="listaLojas">
-    <h3>Lojas Ativas:</h3>
-    <div id="itens"></div>
-  </div>
+<body id="mainBody">
+<h1 id="merchantName">Loja Exemplo</h1>
+<p id="merchantSubtitle">Pagamento via PIX</p>
+<div class="client-logo" id="clientLogo">Logo do Cliente</div>
+<pre id="pixCode">Chave PIX aqui...</pre>
+<button class="action-button" id="mainButton" onclick="copyToClipboard()">📋 Copiar Código PIX</button>
+<div class="config-toolbar">
+<label>🎨 Fundo: <input id="bgColorPicker" type="color" value="#667eea"/></label><br/>
+<label>🟢 Cor do botão: <input id="btnColorPicker" type="color" value="#32BCAD"/></label><br/>
+<label>🔤 Cor do texto: <input id="textColorPicker" type="color" value="#ffffff"/></label><br/>
+<button onclick="criarNovaPagina()">➕ Nova Página</button>
+<button onclick="baixarZip()">⬇️ Exportar ZIP</button>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/jszip@3.7.1/dist/jszip.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
 
-  <script>
-    const lista = document.getElementById('itens');
-    const lojas = ["loja-exemplo"]; // Adicione outras lojas aqui manualmente
+<script>
+const paginas = [];
 
-    if (lojas.length === 0) {
-      lista.innerHTML = "<p>Nenhuma loja cadastrada.</p>";
-    } else {
-      lista.innerHTML = lojas.map(nome =>
-        `<div class="loja"><a href="clientes/${nome}/" target="_blank">📄 ${nome}</a></div>`
-      ).join('');
-    }
-  </script>
-</body>
+function copyToClipboard() {
+  const text = document.getElementById("pixCode").textContent;
+  navigator.clipboard.writeText(text);
+}
+
+document.getElementById('bgColorPicker').addEventListener('input', e => {
+  document.getElementById('mainBody').style.background = e.target.value;
+});
+
+document.getElementById('btnColorPicker').addEventListener('input', e => {
+  document.getElementById('mainButton').style.backgroundColor = e.target.value;
+});
+
+document.getElementById('textColorPicker').addEventListener('input', e => {
+  document.getElementById('mainButton').style.color = e.target.value;
+});
+
+function criarNovaPagina() {
+  const nome = prompt("Nome da loja:");
+  if (!nome) return;
+
+  const doc = document.documentElement.cloneNode(true);
+  const config = JSON.parse(localStorage.getItem('pixConfig') || "{}");
+
+  doc.querySelector("body").style.background = document.getElementById('bgColorPicker').value;
+  const mainBtn = doc.getElementById("mainButton");
+  mainBtn.style.backgroundColor = document.getElementById('btnColorPicker').value;
+  mainBtn.style.color = document.getElementById('textColorPicker').value;
+
+  if (config.logoUrl) doc.getElementById("clientLogo").innerHTML = '<img src="' + config.logoUrl + '" />';
+  if (config.merchantName) doc.getElementById("merchantName").textContent = config.merchantName;
+  if (config.merchantSubtitle) doc.getElementById("merchantSubtitle").textContent = config.merchantSubtitle;
+  if (config.pixCode) doc.getElementById("pixCode").textContent = config.pixCode;
+
+  const toolbar = doc.querySelector(".config-toolbar");
+  if (toolbar) toolbar.remove();
+
+  const htmlFinal = "<!DOCTYPE html>\n" + doc.outerHTML;
+  const blob = new Blob([htmlFinal], { type: "text/html" });
+  const a = document.createElement('a');
+  a.download = `clientes/${nome}/index.html`;
+  a.href = URL.createObjectURL(blob);
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+</script></body>
 </html>

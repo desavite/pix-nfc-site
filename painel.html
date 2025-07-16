@@ -1,0 +1,50 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PIX NFC - Painel de Lojas</title>
+  <style>
+    body { font-family: sans-serif; padding: 2rem; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; }
+    h1 { text-align: center; }
+    .lojas { max-width: 600px; margin: 2rem auto; background: white; border-radius: 10px; padding: 1rem; color: #333; }
+    .loja { padding: 10px; border-bottom: 1px solid #eee; }
+    .loja:last-child { border-bottom: none; }
+    .loja a { text-decoration: none; color: #007bff; font-weight: bold; }
+    .nova { margin: 2rem auto; max-width: 600px; text-align: center; }
+    .nova button {
+      background-color: #32BCAD;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <h1>🏪 Painel de Lojas - PIX NFC</h1>
+  <div class="nova">
+    <button onclick="window.location.href='criador.html'">➕ Criar Nova Loja</button>
+  </div>
+  <div class="lojas" id="listaLojas">
+    <h3>Lojas Ativas:</h3>
+    <div id="itens"></div>
+  </div>
+
+  <script>
+    const lista = document.getElementById('itens');
+    const lojas = ["loja-exemplo"]; // Adicione outras lojas aqui manualmente
+
+    if (lojas.length === 0) {
+      lista.innerHTML = "<p>Nenhuma loja cadastrada.</p>";
+    } else {
+      lista.innerHTML = lojas.map(nome =>
+        `<div class="loja"><a href="clientes/${nome}/" target="_blank">📄 ${nome}</a></div>`
+      ).join('');
+    }
+  </script>
+</body>
+</html>
