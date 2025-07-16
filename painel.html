@@ -2,63 +2,46 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Painel de Lojas - PIX NFC</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel de Lojas</title>
   <style>
     body {
       font-family: sans-serif;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: #fff;
+      background: #f0f0f0;
       padding: 2rem;
     }
     .container {
-      max-width: 600px;
-      margin: 0 auto;
+      max-width: 500px;
+      margin: auto;
       background: white;
+      padding: 2rem;
       border-radius: 10px;
-      padding: 1rem 2rem;
-      color: #333;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
     }
-    .loja {
-      padding: 10px 0;
-      border-bottom: 1px solid #ddd;
-    }
-    .loja:last-child {
-      border-bottom: none;
-    }
-    .loja a {
-      text-decoration: none;
-      color: #007bff;
-      font-weight: bold;
-    }
-    .nova {
+    .link {
+      display: block;
+      margin: 1rem 0;
       text-align: center;
-      margin-bottom: 1rem;
     }
-    .nova a {
+    .link a {
       text-decoration: none;
-      background: #32BCAD;
       color: white;
+      background: #007bff;
       padding: 10px 20px;
-      border-radius: 5px;
+      border-radius: 6px;
       display: inline-block;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>📋 Painel de Lojas</h1>
-    <div class="nova">
-      <a href="index.html">➕ Criar Nova Loja</a>
-    </div>
-    <div class="lojas">
-      <div class="loja"><a href="clientes/loja-exemplo/">🛍️ loja-exemplo</a></div>
-      <!-- Adicione mais lojas manualmente aqui se desejar -->
-    </div>
+    <h1>Painel de Lojas</h1>
+    <div class="link"><a href="index.html">➕ Criar Nova Página</a></div>
+    <div class="link"><a href="clientes/loja-exemplo/">🛍️ loja-exemplo</a></div>
   </div>
 </body>
 </html>
