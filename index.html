@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>PIX - Pagamento Rápido</title>
+<style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 30px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .client-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 15px;
+            background: #f8f9fa;
+            border: 2px dashed #ddd;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .client-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 13px;
+        }
+
+        .logo-placeholder {
+            color: #999;
+            font-size: 14px;
+            text-align: center;
+            padding: 10px;
+        }
+
+        .pix-badge {
+            background: linear-gradient(45deg, #32BCAD, #1BA9A0);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .merchant-info {
+            margin-bottom: 25px;
+        }
+
+        .merchant-name {
+            font-size: 24px;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .merchant-subtitle {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .amount-section {
+            display: none;
+        }
+
+        .amount-label {
+            display: none;
+        }
+
+        .amount-value {
+            display: none;
+        }
+
+        .amount-input {
+            display: none;
+        }
+
+        .pix-code-section {
+            margin-bottom: 25px;
+        }
+
+        .pix-code {
+            background: #f8f9fa;
+            border: 2px dashed #32BCAD;
+            border-radius: 10px;
+            padding: 15px;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            word-break: break-all;
+            color: #333;
+            margin-bottom: 15px;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+
+        .copy-button {
+            background: linear-gradient(45deg, #32BCAD, #1BA9A0);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 50px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+
+        .copy-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(50, 188, 173, 0.3);
+        }
+
+        .copy-button:active {
+            transform: translateY(0);
+        }
+
+        .copy-button.copied {
+            background: #28a745;
+            transform: scale(0.95);
+        }
+
+        .instructions {
+            background: #e8f4f8;
+            border-left: 4px solid #32BCAD;
+            padding: 15px;
+            border-radius: 5px;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+
+        .instructions h3 {
+            color: #32BCAD;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+
+        .instructions ol {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions li {
+            margin-bottom: 5px;
+        }
+
+        .qr-placeholder {
+            width: 200px;
+            height: 200px;
+            background: #f8f9fa;
+            border: 2px dashed #ccc;
+            border-radius: 10px;
+            margin: 20px auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            font-size: 14px;
+        }
+
+        .admin-panel {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1000;
+        }
+
+        .admin-button {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        .admin-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1001;
+        }
+
+        .admin-content {
+            background: white;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 80vh;
+            overflow-y: auto;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        .form-group input, .form-group textarea {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+
+        .form-group textarea {
+            height: 100px;
+            resize: vertical;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            margin: 5px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: #32BCAD;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .success-message {
+            color: #28a745;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            .merchant-name {
+                font-size: 20px;
+            }
+            
+            .amount-value {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body id="mainBody">
+<div class="admin-panel">
+<button class="admin-button" onclick="toggleAdmin()">⚙️ Admin</button>
+</div>
+<div class="container">
+<div class="client-logo" id="clientLogo">
+<div class="logo-placeholder">Logo do Cliente</div>
+</div>
+<div class="pix-badge">💳 Pagamento PIX</div>
+<div class="merchant-info">
+<div class="merchant-name" id="merchantName">Loja Exemplo</div>
+<div class="merchant-subtitle" id="merchantSubtitle">Pagamento via PIX</div>
+</div>
+<div class="pix-code-section">
+<div class="pix-code" id="pixCode">
+                Configure sua chave PIX no painel administrativo
+            </div>
+<button class="copy-button" id="copyButton" onclick="copyToClipboard()">
+                📋 Copiar Código PIX
+            </button>
+</div>
+<div class="instructions">
+<h3>Como pagar:</h3>
+<ol>
+<li>Copie o código PIX acima</li>
+<li>Abra o app do seu banco</li>
+<li>Escolha "PIX" → "Colar código"</li>
+<li>Cole o código e confirme o pagamento</li>
+</ol>
+</div>
+</div>
+<!-- Admin Modal -->
+<div class="admin-modal" id="adminModal">
+<div class="admin-content">
+<h2>Configurações do Comerciante</h2>
+<form id="adminForm">
+<div class="form-group">
+<label for="configMerchantName">Nome do Comerciante:</label>
+<input id="configMerchantName" type="text" value="Loja Exemplo"/>
+</div>
+<div class="form-group">
+<label for="configMerchantSubtitle">Subtítulo:</label>
+<input id="configMerchantSubtitle" type="text" value="Pagamento via PIX"/>
+</div>
+<div class="form-group">
+<label for="configLogo">Logo do Cliente:</label>
+<input accept="image/*" id="configLogo" onchange="previewLogo(this)" type="file"/>
+<small style="color: #666; font-size: 12px;">Formatos aceitos: JPG, PNG, GIF (máx. 2MB)</small>
+</div>
+<div class="form-group">
+<label for="configPixCode">Código PIX:</label>
+<textarea id="configPixCode" placeholder="Cole aqui o código PIX do comerciante" required=""></textarea>
+</div>
+<div>
+<button class="btn btn-primary" onclick="saveConfig()" type="button">Salvar Configurações</button>
+<button class="btn btn-secondary" onclick="closeAdmin()" type="button">Cancelar</button>
+</div>
+<div class="success-message" id="successMessage" style="display: none;">
+                    Configurações salvas com sucesso!
+                </div>
+</form>
+</div>
+</div>
+<script>
+        // Configurações padrão
+        let config = {
+            merchantName: 'Loja Exemplo',
+            merchantSubtitle: 'Pagamento via PIX',
+            logoUrl: '',
+            pixCode: ''
+        };
+
+        // Carregar configurações salvas
+        function loadConfig() {
+            const saved = localStorage.getItem('pixConfig');
+            if (saved) {
+                config = JSON.parse(saved);
+                updateDisplay();
+            }
+        }
+
+        // Preview da logo
+        function previewLogo(input) {
+            const file = input.files[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) { // 2MB
+                    alert('Arquivo muito grande! Máximo 2MB.');
+                    input.value = '';
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    config.logoUrl = e.target.result;
+                    updateLogoDisplay();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Atualizar exibição da logo
+        function updateLogoDisplay() {
+            const logoContainer = document.getElementById('clientLogo');
+            if (config.logoUrl) {
+                logoContainer.innerHTML = `<img src="${config.logoUrl}" alt="Logo do Cliente">`;
+            } else {
+                logoContainer.innerHTML = '<div class="logo-placeholder">Logo do Cliente</div>';
+            }
+        }
+
+        // Salvar configurações
+        function saveConfig() {
+            config.merchantName = document.getElementById('configMerchantName').value;
+            config.merchantSubtitle = document.getElementById('configMerchantSubtitle').value;
+            config.pixCode = document.getElementById('configPixCode').value;
+            
+            if (!config.pixCode.trim()) {
+                alert('Por favor, insira o código PIX!');
+                return;
+            }
+            
+            localStorage.setItem('pixConfig', JSON.stringify(config));
+            updateDisplay();
+            
+            document.getElementById('successMessage').style.display = 'block';
+            setTimeout(() => {
+                document.getElementById('successMessage').style.display = 'none';
+                closeAdmin();
+            }, 2000);
+        }
+
+        // Atualizar display
+        function updateDisplay() {
+            document.getElementById('merchantName').textContent = config.merchantName;
+            document.getElementById('merchantSubtitle').textContent = config.merchantSubtitle;
+            
+            if (config.pixCode) {
+                document.getElementById('pixCode').textContent = config.pixCode;
+            } else {
+                document.getElementById('pixCode').textContent = 'Configure sua chave PIX no painel administrativo';
+            }
+            
+            updateLogoDisplay();
+        }
+
+        // Copiar para clipboard
+        async function copyToClipboard() {
+            const pixCode = document.getElementById('pixCode').textContent;
+            const copyButton = document.getElementById('copyButton');
+            
+            if (pixCode === 'Configure sua chave PIX no painel administrativo') {
+                alert('Por favor, configure o código PIX no painel administrativo primeiro');
+                return;
+            }
+            
+            try {
+                await navigator.clipboard.writeText(pixCode);
+                copyButton.textContent = '✅ Copiado!';
+                copyButton.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyButton.textContent = '📋 Copiar Código PIX';
+                    copyButton.classList.remove('copied');
+                }, 2000);
+            } catch (err) {
+                // Fallback para dispositivos mais antigos
+                const textArea = document.createElement('textarea');
+                textArea.value = pixCode;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                
+                copyButton.textContent = '✅ Copiado!';
+                copyButton.classList.add('copied');
+                
+                setTimeout(() => {
+                    copyButton.textContent = '📋 Copiar Código PIX';
+                    copyButton.classList.remove('copied');
+                }, 2000);
+            }
+        }
+
+        // Funções do admin
+        function toggleAdmin() {
+            document.getElementById('adminModal').style.display = 'block';
+            
+            // Preencher formulário com dados atuais
+            document.getElementById('configMerchantName').value = config.merchantName;
+            document.getElementById('configMerchantSubtitle').value = config.merchantSubtitle;
+            document.getElementById('configPixCode').value = config.pixCode;
+        }
+
+        function closeAdmin() {
+            document.getElementById('adminModal').style.display = 'none';
+        }
+
+        // Fechar modal ao clicar fora
+        document.getElementById('adminModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeAdmin();
+            }
+        });
+
+        // Carregar configurações ao iniciar
+        loadConfig();
+    </script>
+
+<style>
+    .config-toolbar {
+        position: fixed;
+        bottom: 20px;
+        left: 20px;
+        z-index: 9999;
+        background: rgba(255,255,255,0.95);
+        border: 1px solid #ccc;
+        border-radius: 10px;
+        padding: 10px 15px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+    .config-toolbar input[type="color"] {
+        border: none;
+        width: 40px;
+        height: 30px;
+        padding: 0;
+    }
+    .qr-preview {
+        text-align: center;
+        margin-top: 15px;
+    }
+</style>
+<div class="config-toolbar">
+<label>🎨 Cor:
+        <input id="bgColorPicker" type="color" value="#667eea"/>
+</label>
+<button onclick="criarNovaPagina()">➕ Nova Página</button>
+<button onclick="baixarZip()">⬇️ Exportar .ZIP</button>
+</div>
+<div class="qr-preview">
+<canvas id="qrcodeCanvas"></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
+<script>
+document.getElementById('bgColorPicker').addEventListener('input', function(e) {
+    document.getElementById('mainBody').style.background = e.target.value;
+});
+
+function criarNovaPagina() {
+    const nome = prompt("Nome da loja:");
+    if (!nome) return;
+
+    const doc = document.documentElement.cloneNode(true);
+    const cor = document.getElementById('bgColorPicker').value;
+    doc.querySelector("body").style.background = cor;
+
+    const config = JSON.parse(localStorage.getItem('pixConfig') || "{}");
+    if (config.logoUrl) {
+        doc.getElementById("clientLogo").innerHTML = `<img src="${config.logoUrl}" alt="Logo do Cliente">`;
+    }
+    if (config.merchantName) {
+        doc.getElementById("merchantName").textContent = config.merchantName;
+    }
+    if (config.merchantSubtitle) {
+        doc.getElementById("merchantSubtitle").textContent = config.merchantSubtitle;
+    }
+    if (config.pixCode) {
+        doc.getElementById("pixCode").textContent = config.pixCode;
+        QRCode.toCanvas(document.getElementById('qrcodeCanvas'), config.pixCode);
+    }
+
+    const toolbar = doc.querySelector(".config-toolbar");
+    if (toolbar) toolbar.remove();
+
+    const blob = new Blob([doc.outerHTML], { type: "text/html" });
+    const a = document.createElement('a');
+    a.download = `clientes/${nome}/index.html`;
+    a.href = URL.createObjectURL(blob);
+    a.click();
+    URL.revokeObjectURL(a.href);
+}
+
+function baixarZip() {
+    alert("📦 Para exportar várias páginas como .zip e subir para Netlify, use um gerador local ou painel de administração (não suportado diretamente pelo navegador).");
+}
+</script>
+</body>
+</html>
